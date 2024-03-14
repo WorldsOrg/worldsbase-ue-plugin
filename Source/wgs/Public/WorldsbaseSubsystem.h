@@ -9,7 +9,7 @@
 
 #include "Delegates/Delegate.h"
 
-#include "WgsSubsystem.generated.h"
+#include "WorldsbaseSubsystem.generated.h"
 
 
 // Define a delegate with a FString parameter for the result
@@ -34,20 +34,20 @@ struct FDataRow
  *
  */
 UCLASS()
-class WGS_API UWgsSubsystem : public UEngineSubsystem
+class WORLDSBASE_API UWorldsbaseSubsystem : public UEngineSubsystem
 {
 	GENERATED_BODY()
 
 public:
 
-	UFUNCTION(BlueprintCallable, Category = "WGS")
+	UFUNCTION(BlueprintCallable, Category = "Worldsbase")
 	void GetTable(const FString& TableName);
 
-	UFUNCTION(BlueprintCallable, Category = "WGS")
+	UFUNCTION(BlueprintCallable, Category = "Worldsbase")
 	void InsertData(const FString& TableName, const TArray<FDataRow>& DataRows);
 
 	// Delegate instance for Blueprint to bind to
-	UPROPERTY(BlueprintAssignable, Category = "WGS")
+	UPROPERTY(BlueprintAssignable, Category = "Worldsbase")
 	FOnHttpRequestCompleted OnHttpRequestCompleted;
 
 private:

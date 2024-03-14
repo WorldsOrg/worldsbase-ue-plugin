@@ -1,14 +1,14 @@
-#include "WgsSubsystem.h"
+#include "WorldsbaseSubsystem.h"
 
 #include "Serialization/JsonSerializer.h"
 
 
 /**
- * Reads data from a specified table using WGS.
+ * Reads data from a specified table using Worldsbase.
  *
  * @param TableName The name of the table where the data will be read
  */
-void UWgsSubsystem::GetTable(const FString& TableName)
+void UWorldsbaseSubsystem::GetTable(const FString& TableName)
 {
 
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = FHttpModule::Get().CreateRequest();
@@ -21,19 +21,19 @@ void UWgsSubsystem::GetTable(const FString& TableName)
 	HttpRequest->SetHeader("Content-Type", "application/json");
 	HttpRequest->SetURL(*FString::Printf(TEXT("%s"), *fullUrl));
 	HttpRequest->SetHeader("x-api-key", *FString::Printf(TEXT("%s"), *ApiKey));
-	HttpRequest->OnProcessRequestComplete().BindUObject(this, &UWgsSubsystem::OnProcessRequestComplete);
+	HttpRequest->OnProcessRequestComplete().BindUObject(this, &UWorldsbaseSubsystem::OnProcessRequestComplete);
 	HttpRequest->ProcessRequest();
 }
 
 /**
- * Inserts data into a specified table using WGS. This function constructs
+ * Inserts data into a specified table using Worldsbase. This function constructs
  * a JSON object from the provided data rows, and then sends a POST request
  * to a predefined URL to insert the data into the specified table.
  *
  * @param TableName The name of the table where the data will be inserted.
  * @param DataRows An array of FDataRow structures, each containing the column name and the value to be inserted for that column.
  */
-void UWgsSubsystem::InsertData(const FString& TableName, const TArray<FDataRow>& DataRows)
+void UWorldsbaseSubsystem::InsertData(const FString& TableName, const TArray<FDataRow>& DataRows)
 {
 
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = FHttpModule::Get().CreateRequest();
@@ -45,7 +45,7 @@ void UWgsSubsystem::InsertData(const FString& TableName, const TArray<FDataRow>&
 		DataJsonObject->SetStringField(DataRow.ColumnName, DataRow.Value);
 	}
 
-	// create json object containing data json. This is the final form for wgs
+	// create json object containing data json. This is the final form for Worldsbase
 	// insertData endpoint
 	TSharedPtr<FJsonObject> FinalJsonObject = MakeShareable(new FJsonObject);
 	FinalJsonObject->SetObjectField(TEXT("data"), DataJsonObject);
@@ -64,7 +64,7 @@ void UWgsSubsystem::InsertData(const FString& TableName, const TArray<FDataRow>&
 	HttpRequest->SetContentAsString(OutputString);
 	HttpRequest->SetURL(*FString::Printf(TEXT("%s"), *baseUrl));
 	HttpRequest->SetHeader("x-api-key", *FString::Printf(TEXT("%s"), *ApiKey));
-	HttpRequest->OnProcessRequestComplete().BindUObject(this, &UWgsSubsystem::OnProcessRequestComplete);
+	HttpRequest->OnProcessRequestComplete().BindUObject(this, &UWorldsbaseSubsystem::OnProcessRequestComplete);
 	HttpRequest->ProcessRequest();
 }
 
@@ -75,7 +75,7 @@ void UWgsSubsystem::InsertData(const FString& TableName, const TArray<FDataRow>&
  * @param Response Pointer to Response object
  * @param bWasSuccessful Indicates if request was successful
  */
-void UWgsSubsystem::OnProcessRequestComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+void UWorldsbaseSubsystem::OnProcessRequestComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
 	if (bWasSuccessful && Response.IsValid())
 	{

@@ -1,10 +1,8 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
-
 using UnrealBuildTool;
 
-public class wgs : ModuleRules
+public class worldsbase : ModuleRules
 {
-	public wgs(ReadOnlyTargetRules Target) : base(Target)
+	public worldsbase(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		

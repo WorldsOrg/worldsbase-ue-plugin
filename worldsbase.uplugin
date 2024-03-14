@@ -2,10 +2,10 @@
 	"FileVersion": 3,
 	"Version": 1,
 	"VersionName": "1.0",
-	"FriendlyName": "wgs",
+	"FriendlyName": "Worldsbase",
 	"Description": "",
 	"Category": "Other",
-	"CreatedBy": "worlds",
+	"CreatedBy": "Worlds",
 	"CreatedByURL": "",
 	"DocsURL": "",
 	"MarketplaceURL": "",
@@ -16,7 +16,7 @@
 	"Installed": false,
 	"Modules": [
 		{
-			"Name": "wgs",
+			"Name": "Worldsbase",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
 		}

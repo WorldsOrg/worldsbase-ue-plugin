@@ -1,4 +1,3 @@
 */.vs/
-wgs/Binaries/*
-wgs/Binaries/Win64/UnrealEditor-wgs.dll
-wgs/Binaries/Win64/UnrealEditor-wgs.dll
+worldsbase-ue-plugin/Binaries/*
+worldsbase-ue-plugin/Intermediate/*

@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
-class FwgsModule : public IModuleInterface
+class FworldsbaseModule : public IModuleInterface
 {
 public:
 
