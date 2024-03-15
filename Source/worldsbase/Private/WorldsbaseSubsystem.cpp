@@ -69,6 +69,86 @@ void UWorldsbaseSubsystem::InsertData(const FString& TableName, const TArray<FDa
 }
 
 /**
+ * Increments data to a specified column matching a condition in a specified table.
+ *
+ * @param TableName The name of the table where the data will be incremented
+ * @param ColumnName The name of the column where the data will be incremented
+ * @param Condition Will match for find the entry to increment
+ * @param Value Value to increment by
+ */
+void UWorldsbaseSubsystem::IncrementData(const FString& TableName, const FString& IncrementColumnName, const FString& ConditionColumn, const FString& ConditionValue, const int32 Value)
+{
+
+	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = FHttpModule::Get().CreateRequest();
+
+	// construct sql condition to select upon
+	FString Condition = FString::Printf(TEXT("%s='%s'"), *ConditionColumn, *ConditionValue);
+
+	// create json object for post request
+	TSharedPtr<FJsonObject> FinalJsonObject = MakeShareable(new FJsonObject);
+	FinalJsonObject->SetStringField(TEXT("tableName"), TableName);
+	FinalJsonObject->SetStringField(TEXT("columnName"), IncrementColumnName);
+	FinalJsonObject->SetStringField(TEXT("condition"), Condition);
+	FinalJsonObject->SetStringField(TEXT("value"), FString::FromInt(Value));
+
+	// convert json to string
+	FString OutputString;
+	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&OutputString);
+	FJsonSerializer::Serialize(FinalJsonObject.ToSharedRef(), Writer);
+
+	FString baseUrl = "https://wgs-node-production.up.railway.app/table/incrementData/";
+	FString ApiKey = "323f7dfb-6ba3-4ba0-99cb-c493a3a712d7";
+
+	HttpRequest->SetVerb("POST");
+	HttpRequest->SetHeader("Content-Type", "application/json");
+	HttpRequest->SetContentAsString(OutputString);
+	HttpRequest->SetURL(*FString::Printf(TEXT("%s"), *baseUrl));
+	HttpRequest->SetHeader("x-api-key", *FString::Printf(TEXT("%s"), *ApiKey));
+	HttpRequest->OnProcessRequestComplete().BindUObject(this, &UWorldsbaseSubsystem::OnProcessRequestComplete);
+	HttpRequest->ProcessRequest();
+}
+
+/**
+ * Decrements data to a specified column matching a condition in a specified table.
+ *
+ * @param TableName The name of the table where the data will be decremented
+ * @param ColumnName The name of the column where the data will be decremented
+ * @param Condition Will match for find the entry to decrement
+ * @param Value Value to decrement by
+ */
+void UWorldsbaseSubsystem::DecrementData(const FString& TableName, const FString& DecrementColumnName, const FString& ConditionColumn, const FString& ConditionValue, const int32 Value)
+{
+
+	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = FHttpModule::Get().CreateRequest();
+
+	// construct sql condition to select upon
+	FString Condition = FString::Printf(TEXT("%s='%s'"), *ConditionColumn, *ConditionValue);
+
+	// create json object for post request
+	TSharedPtr<FJsonObject> FinalJsonObject = MakeShareable(new FJsonObject);
+	FinalJsonObject->SetStringField(TEXT("tableName"), TableName);
+	FinalJsonObject->SetStringField(TEXT("columnName"), DecrementColumnName);
+	FinalJsonObject->SetStringField(TEXT("condition"), Condition);
+	FinalJsonObject->SetStringField(TEXT("value"), FString::FromInt(Value));
+
+	// convert json to string
+	FString OutputString;
+	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&OutputString);
+	FJsonSerializer::Serialize(FinalJsonObject.ToSharedRef(), Writer);
+
+	FString baseUrl = "https://wgs-node-production.up.railway.app/table/decrementData/";
+	FString ApiKey = "323f7dfb-6ba3-4ba0-99cb-c493a3a712d7";
+
+	HttpRequest->SetVerb("POST");
+	HttpRequest->SetHeader("Content-Type", "application/json");
+	HttpRequest->SetContentAsString(OutputString);
+	HttpRequest->SetURL(*FString::Printf(TEXT("%s"), *baseUrl));
+	HttpRequest->SetHeader("x-api-key", *FString::Printf(TEXT("%s"), *ApiKey));
+	HttpRequest->OnProcessRequestComplete().BindUObject(this, &UWorldsbaseSubsystem::OnProcessRequestComplete);
+	HttpRequest->ProcessRequest();
+}
+
+/**
  * Function that gets called when http request processes are complete
  *
  * @param Request Pointer to Request object

@@ -1,3 +1,4 @@
 */.vs/
-worldsbase-ue-plugin/Binaries/*
-worldsbase-ue-plugin/Intermediate/*
+Binaries/
+Binaries/Win64
+Intermediate/*

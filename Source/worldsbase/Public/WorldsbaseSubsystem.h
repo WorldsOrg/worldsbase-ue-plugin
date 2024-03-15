@@ -46,6 +46,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Worldsbase")
 	void InsertData(const FString& TableName, const TArray<FDataRow>& DataRows);
 
+	UFUNCTION(BlueprintCallable, Category = "Worldsbase")
+	void IncrementData(const FString& TableName, const FString& IncrementColumnName, const FString& ConditionColumn, const FString& ConditionValue, const int32 Value);
+
+	UFUNCTION(BlueprintCallable, Category = "Worldsbase")
+	void DecrementData(const FString& TableName, const FString& DecrementColumnName, const FString& ConditionColumn, const FString& ConditionValue, const int32 Value);
+
 	// Delegate instance for Blueprint to bind to
 	UPROPERTY(BlueprintAssignable, Category = "Worldsbase")
 	FOnHttpRequestCompleted OnHttpRequestCompleted;
