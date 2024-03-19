@@ -69,11 +69,58 @@ void UWorldsbaseSubsystem::InsertData(const FString& TableName, const TArray<FDa
 }
 
 /**
+ * Updates data in a specified column matching a condition in a specified table.
+ *
+ * @param TableName The name of the table where the data will be incremented
+ * @param ConditionColumn The name of the column used to identify the row to be updated
+ * @param ConditionValue Value for column that is used to identify row to be updated
+ * @param DataRows An array of FDataRow structures, each containing the column name and the value to be updated for that column.
+ */
+void UWorldsbaseSubsystem::UpdateData(const FString& TableName, const FString& ConditionColumn, const FString& ConditionValue, const TArray<FDataRow>& DataRows)
+{
+
+	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = FHttpModule::Get().CreateRequest();
+
+	// construct sql condition to select upon
+	FString Condition = FString::Printf(TEXT("%s='%s'"), *ConditionColumn, *ConditionValue);
+
+	// construct json object from data array
+	TSharedPtr<FJsonObject> DataJsonObject = MakeShareable(new FJsonObject);
+	for (const FDataRow& DataRow : DataRows)
+	{
+		DataJsonObject->SetStringField(DataRow.ColumnName, DataRow.Value);
+	}
+
+	// create json object for post request
+	TSharedPtr<FJsonObject> FinalJsonObject = MakeShareable(new FJsonObject);
+	FinalJsonObject->SetStringField(TEXT("tableName"), TableName);
+	FinalJsonObject->SetStringField(TEXT("condition"), Condition);
+	FinalJsonObject->SetObjectField(TEXT("data"), DataJsonObject);
+
+	// convert json to string
+	FString OutputString;
+	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&OutputString);
+	FJsonSerializer::Serialize(FinalJsonObject.ToSharedRef(), Writer);
+
+	FString baseUrl = "https://wgs-node-production.up.railway.app/table/updateData/";
+	FString ApiKey = "323f7dfb-6ba3-4ba0-99cb-c493a3a712d7";
+
+	HttpRequest->SetVerb("PUT");
+	HttpRequest->SetHeader("Content-Type", "application/json");
+	HttpRequest->SetContentAsString(OutputString);
+	HttpRequest->SetURL(*FString::Printf(TEXT("%s"), *baseUrl));
+	HttpRequest->SetHeader("x-api-key", *FString::Printf(TEXT("%s"), *ApiKey));
+	HttpRequest->OnProcessRequestComplete().BindUObject(this, &UWorldsbaseSubsystem::OnProcessRequestComplete);
+	HttpRequest->ProcessRequest();
+}
+
+/**
  * Increments data to a specified column matching a condition in a specified table.
  *
  * @param TableName The name of the table where the data will be incremented
- * @param ColumnName The name of the column where the data will be incremented
- * @param Condition Will match for find the entry to increment
+ * @param IncrementColumnName The name of the column where the data will be incremented
+ * @param ConditionColumn The name of the column used to identify the row to be incremented
+ * @param ConditionValue Value for column that is used to identify row to be incremented
  * @param Value Value to increment by
  */
 void UWorldsbaseSubsystem::IncrementData(const FString& TableName, const FString& IncrementColumnName, const FString& ConditionColumn, const FString& ConditionValue, const int32 Value)
@@ -112,8 +159,9 @@ void UWorldsbaseSubsystem::IncrementData(const FString& TableName, const FString
  * Decrements data to a specified column matching a condition in a specified table.
  *
  * @param TableName The name of the table where the data will be decremented
- * @param ColumnName The name of the column where the data will be decremented
- * @param Condition Will match for find the entry to decrement
+ * @param DecrementColumnName The name of the column where the data will be decremented
+ * @param ConditionColumn The name of the column used to identify the row to be decremented
+ * @param ConditionValue Value for column that is used to identify row to be decremented
  * @param Value Value to decrement by
  */
 void UWorldsbaseSubsystem::DecrementData(const FString& TableName, const FString& DecrementColumnName, const FString& ConditionColumn, const FString& ConditionValue, const int32 Value)

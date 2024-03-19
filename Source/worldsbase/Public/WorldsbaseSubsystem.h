@@ -47,6 +47,9 @@ public:
 	void InsertData(const FString& TableName, const TArray<FDataRow>& DataRows);
 
 	UFUNCTION(BlueprintCallable, Category = "Worldsbase")
+	void UpdateData(const FString& TableName, const FString& ConditionColumn, const FString& ConditionValue, const TArray<FDataRow>& DataRows);
+
+	UFUNCTION(BlueprintCallable, Category = "Worldsbase")
 	void IncrementData(const FString& TableName, const FString& IncrementColumnName, const FString& ConditionColumn, const FString& ConditionValue, const int32 Value);
 
 	UFUNCTION(BlueprintCallable, Category = "Worldsbase")
