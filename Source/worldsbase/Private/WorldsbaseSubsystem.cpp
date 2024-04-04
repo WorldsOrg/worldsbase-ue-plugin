@@ -1,5 +1,8 @@
 #include "WorldsbaseSubsystem.h"
 
+#include "WorldsbaseJsonObject.h"
+#include "WorldsbaseHttpTypes.h"
+#include "GenericPlatform/GenericPlatformHttp.h"
 #include "Serialization/JsonSerializer.h"
 
 
@@ -10,7 +13,6 @@
  */
 void UWorldsbaseSubsystem::GetTable(const FString& TableName)
 {
-
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = FHttpModule::Get().CreateRequest();
 
 	FString baseUrl = "https://wgs-node-production.up.railway.app/table/getTable/";
@@ -21,7 +23,7 @@ void UWorldsbaseSubsystem::GetTable(const FString& TableName)
 	HttpRequest->SetHeader("Content-Type", "application/json");
 	HttpRequest->SetURL(*FString::Printf(TEXT("%s"), *fullUrl));
 	HttpRequest->SetHeader("x-api-key", *FString::Printf(TEXT("%s"), *ApiKey));
-	HttpRequest->OnProcessRequestComplete().BindUObject(this, &UWorldsbaseSubsystem::OnProcessRequestComplete);
+	HttpRequest->OnProcessRequestComplete().BindUObject(this, &UWorldsbaseSubsystem::OnProcessRequestCompleteString);
 	HttpRequest->ProcessRequest();
 }
 
@@ -35,7 +37,6 @@ void UWorldsbaseSubsystem::GetTable(const FString& TableName)
  */
 void UWorldsbaseSubsystem::InsertData(const FString& TableName, const TArray<FDataRow>& DataRows)
 {
-
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = FHttpModule::Get().CreateRequest();
 
 	// construct json object from data array
@@ -64,7 +65,7 @@ void UWorldsbaseSubsystem::InsertData(const FString& TableName, const TArray<FDa
 	HttpRequest->SetContentAsString(OutputString);
 	HttpRequest->SetURL(*FString::Printf(TEXT("%s"), *baseUrl));
 	HttpRequest->SetHeader("x-api-key", *FString::Printf(TEXT("%s"), *ApiKey));
-	HttpRequest->OnProcessRequestComplete().BindUObject(this, &UWorldsbaseSubsystem::OnProcessRequestComplete);
+	HttpRequest->OnProcessRequestComplete().BindUObject(this, &UWorldsbaseSubsystem::OnProcessRequestCompleteString);
 	HttpRequest->ProcessRequest();
 }
 
@@ -76,9 +77,9 @@ void UWorldsbaseSubsystem::InsertData(const FString& TableName, const TArray<FDa
  * @param ConditionValue Value for column that is used to identify row to be updated
  * @param DataRows An array of FDataRow structures, each containing the column name and the value to be updated for that column.
  */
-void UWorldsbaseSubsystem::UpdateData(const FString& TableName, const FString& ConditionColumn, const FString& ConditionValue, const TArray<FDataRow>& DataRows)
+void UWorldsbaseSubsystem::UpdateData(const FString& TableName, const FString& ConditionColumn,
+                                      const FString& ConditionValue, const TArray<FDataRow>& DataRows)
 {
-
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = FHttpModule::Get().CreateRequest();
 
 	// construct sql condition to select upon
@@ -110,7 +111,7 @@ void UWorldsbaseSubsystem::UpdateData(const FString& TableName, const FString& C
 	HttpRequest->SetContentAsString(OutputString);
 	HttpRequest->SetURL(*FString::Printf(TEXT("%s"), *baseUrl));
 	HttpRequest->SetHeader("x-api-key", *FString::Printf(TEXT("%s"), *ApiKey));
-	HttpRequest->OnProcessRequestComplete().BindUObject(this, &UWorldsbaseSubsystem::OnProcessRequestComplete);
+	HttpRequest->OnProcessRequestComplete().BindUObject(this, &UWorldsbaseSubsystem::OnProcessRequestCompleteString);
 	HttpRequest->ProcessRequest();
 }
 
@@ -123,9 +124,10 @@ void UWorldsbaseSubsystem::UpdateData(const FString& TableName, const FString& C
  * @param ConditionValue Value for column that is used to identify row to be incremented
  * @param Value Value to increment by
  */
-void UWorldsbaseSubsystem::IncrementData(const FString& TableName, const FString& IncrementColumnName, const FString& ConditionColumn, const FString& ConditionValue, const int32 Value)
+void UWorldsbaseSubsystem::IncrementData(const FString& TableName, const FString& IncrementColumnName,
+                                         const FString& ConditionColumn, const FString& ConditionValue,
+                                         const int32 Value)
 {
-
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = FHttpModule::Get().CreateRequest();
 
 	// construct sql condition to select upon
@@ -151,7 +153,7 @@ void UWorldsbaseSubsystem::IncrementData(const FString& TableName, const FString
 	HttpRequest->SetContentAsString(OutputString);
 	HttpRequest->SetURL(*FString::Printf(TEXT("%s"), *baseUrl));
 	HttpRequest->SetHeader("x-api-key", *FString::Printf(TEXT("%s"), *ApiKey));
-	HttpRequest->OnProcessRequestComplete().BindUObject(this, &UWorldsbaseSubsystem::OnProcessRequestComplete);
+	HttpRequest->OnProcessRequestComplete().BindUObject(this, &UWorldsbaseSubsystem::OnProcessRequestCompleteString);
 	HttpRequest->ProcessRequest();
 }
 
@@ -164,9 +166,10 @@ void UWorldsbaseSubsystem::IncrementData(const FString& TableName, const FString
  * @param ConditionValue Value for column that is used to identify row to be decremented
  * @param Value Value to decrement by
  */
-void UWorldsbaseSubsystem::DecrementData(const FString& TableName, const FString& DecrementColumnName, const FString& ConditionColumn, const FString& ConditionValue, const int32 Value)
+void UWorldsbaseSubsystem::DecrementData(const FString& TableName, const FString& DecrementColumnName,
+                                         const FString& ConditionColumn, const FString& ConditionValue,
+                                         const int32 Value)
 {
-
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = FHttpModule::Get().CreateRequest();
 
 	// construct sql condition to select upon
@@ -192,9 +195,86 @@ void UWorldsbaseSubsystem::DecrementData(const FString& TableName, const FString
 	HttpRequest->SetContentAsString(OutputString);
 	HttpRequest->SetURL(*FString::Printf(TEXT("%s"), *baseUrl));
 	HttpRequest->SetHeader("x-api-key", *FString::Printf(TEXT("%s"), *ApiKey));
-	HttpRequest->OnProcessRequestComplete().BindUObject(this, &UWorldsbaseSubsystem::OnProcessRequestComplete);
+	HttpRequest->OnProcessRequestComplete().BindUObject(this, &UWorldsbaseSubsystem::OnProcessRequestCompleteString);
 	HttpRequest->ProcessRequest();
 }
+
+void UWorldsbaseSubsystem::MakeHttpRequest(
+	const FString& URL,
+	const ERequestVerb Verb,
+	UJsonObject* Body = NewObject<UJsonObject>(),
+	const ERequestContentType ContentType = ERequestContentType::json,
+	const TMap<FString, FString>& RequestHeaders = {},
+	const TArray<uint8>& Bytes = TArray<uint8>{},
+	const FString& StringContent = ""
+)
+{
+	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = FHttpModule::Get().CreateRequest();
+	HttpRequest->SetVerb(GetRequestVerb(Verb));
+	HttpRequest->SetHeader(TEXT("Content-Type"), GetRequestContentType(ContentType));
+
+	FString UrlParams = "";
+	switch (ContentType)
+	{
+	case ERequestContentType::x_www_form_urlencoded:
+		{
+			uint16 ParamIdx = 0;
+			for (auto RequestIt = Body->GetRootObject()->Values.CreateIterator(); RequestIt; ++RequestIt)
+			{
+				FString Key = RequestIt.Key();
+				FString Value = RequestIt.Value().Get()->AsString();
+				if (!Key.IsEmpty() && !Value.IsEmpty())
+				{
+					UrlParams += ParamIdx == 0 ? "?" : "&";
+					UrlParams += FGenericPlatformHttp::UrlEncode(Key) + "=" + FGenericPlatformHttp::UrlEncode(Value);
+				}
+				ParamIdx++;
+			}
+
+			if (!StringContent.IsEmpty())
+			{
+				HttpRequest->SetContentAsString(StringContent);
+			}
+
+			break;
+		}
+	case ERequestContentType::binary:
+		{
+			HttpRequest->SetContent(Bytes);
+			break;
+		}
+	case ERequestContentType::json:
+		{
+			if (Verb == ERequestVerb::GET)
+			{
+				break;
+			}
+			FString OutputString;
+			const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&OutputString);
+			FJsonSerializer::Serialize(Body->GetRootObject(), Writer);
+			HttpRequest->SetContentAsString(OutputString);
+			break;
+		}
+	default:
+		break;
+	}
+
+	HttpRequest->SetURL(URL + UrlParams);
+
+	for (TMap<FString, FString>::TConstIterator It(RequestHeaders); It; ++It)
+	{
+		HttpRequest->SetHeader(It.Key(), It.Value());
+	}
+
+	HttpRequest->OnProcessRequestComplete().BindUObject(this, &UWorldsbaseSubsystem::OnProcessRequestCompleteJson);
+	HttpRequest->ProcessRequest();
+}
+
+UJsonObject* UWorldsbaseSubsystem::ConstructJsonObject()
+{
+	return NewObject<UJsonObject>(this);
+}
+
 
 /**
  * Function that gets called when http request processes are complete
@@ -203,7 +283,8 @@ void UWorldsbaseSubsystem::DecrementData(const FString& TableName, const FString
  * @param Response Pointer to Response object
  * @param bWasSuccessful Indicates if request was successful
  */
-void UWorldsbaseSubsystem::OnProcessRequestComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+void UWorldsbaseSubsystem::OnProcessRequestCompleteString(FHttpRequestPtr Request, FHttpResponsePtr Response,
+                                                          bool bWasSuccessful)
 {
 	if (bWasSuccessful && Response.IsValid())
 	{
@@ -214,7 +295,7 @@ void UWorldsbaseSubsystem::OnProcessRequestComplete(FHttpRequestPtr Request, FHt
 
 		// Trigger the delegate with the result. This allows blueprint node to do
 		// something with the result.
-		OnHttpRequestCompleted.Broadcast(ContentAsString);
+		OnHttpRequestCompletedString.Broadcast(ContentAsString);
 
 		// print to debugger display
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, ContentAsString);
@@ -226,3 +307,25 @@ void UWorldsbaseSubsystem::OnProcessRequestComplete(FHttpRequestPtr Request, FHt
 	}
 }
 
+void UWorldsbaseSubsystem::OnProcessRequestCompleteJson(FHttpRequestPtr Request, FHttpResponsePtr Response,
+                                                        bool bWasSuccessful)
+{
+	if (bWasSuccessful && Response.IsValid())
+	{
+		TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>();
+		TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(Response->GetContentAsString());
+		FJsonSerializer::Deserialize(JsonReader, JsonObject);
+
+		UJsonObject* ResponseBody = NewObject<UJsonObject>();
+		ResponseBody->SetRootObject(JsonObject);
+
+		OnHttpRequestCompletedJson.Broadcast(
+			static_cast<EHttpStatusCode>(Response.Get()->GetResponseCode()),
+			ResponseBody
+		);
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Error"));
+	}
+}
