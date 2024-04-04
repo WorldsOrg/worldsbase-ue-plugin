@@ -432,9 +432,6 @@ void UJsonObject::SetMapFields_bool(const TMap<FString, bool>& Fields)
 	SetMapFields_Impl(Fields);
 }
 
-//////////////////////////////////////////////////////////////////////////
-// Array fields helpers (uniform arrays)
-
 TArray<float> UJsonObject::GetNumberArrayField(const FString& FieldName) const
 {
 	return GetTypeArrayField<float>(FieldName);
