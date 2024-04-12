@@ -2,19 +2,42 @@
 
 #include "Serialization/JsonSerializer.h"
 
-
 /**
  * Reads data from a specified table using Worldsbase.
  *
  * @param TableName The name of the table where the data will be read
  */
-void UWorldsbaseSubsystem::GetTable(const FString& TableName)
+void UWorldsbaseSubsystem::GetTable(const FString &TableName)
 {
 
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = FHttpModule::Get().CreateRequest();
 
-	FString baseUrl = "https://wgs-node-production.up.railway.app/table/getTable/";
+	FString baseUrl = "https://chain-production.up.railway.app/table/gettable/";
 	FString fullUrl = FString::Printf(TEXT("%s%s"), *baseUrl, *TableName);
+	FString ApiKey = "323f7dfb-6ba3-4ba0-99cb-c493a3a712d7";
+
+	HttpRequest->SetVerb("GET");
+	HttpRequest->SetHeader("Content-Type", "application/json");
+	HttpRequest->SetURL(*FString::Printf(TEXT("%s"), *fullUrl));
+	HttpRequest->SetHeader("x-api-key", *FString::Printf(TEXT("%s"), *ApiKey));
+	HttpRequest->OnProcessRequestComplete().BindUObject(this, &UWorldsbaseSubsystem::OnProcessRequestComplete);
+	HttpRequest->ProcessRequest();
+}
+
+/**
+ * Reads data from a specified table using Worldsbase.
+ *
+ * @param TableName The name of the table where the data will be read
+ * @param ColumnName The name of the column to filter by
+ * @param ColumnValue The value to filter by
+ */
+void UWorldsbaseSubsystem::GetValue(const FString &TableName, const FString &ColumnName, const FString &ColumnValue)
+{
+
+	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = FHttpModule::Get().CreateRequest();
+
+	FString baseUrl = "https://chain-production.up.railway.app/table/getvalue/";
+	FString fullUrl = FString::Printf(TEXT("%s%s/%s/%s"), *baseUrl, *TableName, *ColumnName, *ColumnValue);
 	FString ApiKey = "323f7dfb-6ba3-4ba0-99cb-c493a3a712d7";
 
 	HttpRequest->SetVerb("GET");
@@ -33,14 +56,14 @@ void UWorldsbaseSubsystem::GetTable(const FString& TableName)
  * @param TableName The name of the table where the data will be inserted.
  * @param DataRows An array of FDataRow structures, each containing the column name and the value to be inserted for that column.
  */
-void UWorldsbaseSubsystem::InsertData(const FString& TableName, const TArray<FDataRow>& DataRows)
+void UWorldsbaseSubsystem::InsertData(const FString &TableName, const TArray<FDataRow> &DataRows)
 {
 
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = FHttpModule::Get().CreateRequest();
 
 	// construct json object from data array
 	TSharedPtr<FJsonObject> DataJsonObject = MakeShareable(new FJsonObject);
-	for (const FDataRow& DataRow : DataRows)
+	for (const FDataRow &DataRow : DataRows)
 	{
 		DataJsonObject->SetStringField(DataRow.ColumnName, DataRow.Value);
 	}
@@ -56,7 +79,7 @@ void UWorldsbaseSubsystem::InsertData(const FString& TableName, const TArray<FDa
 	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&OutputString);
 	FJsonSerializer::Serialize(FinalJsonObject.ToSharedRef(), Writer);
 
-	FString baseUrl = "https://wgs-node-production.up.railway.app/table/insertData";
+	FString baseUrl = "https://chain-production.up.railway.app/table/insertdata";
 	FString ApiKey = "323f7dfb-6ba3-4ba0-99cb-c493a3a712d7";
 
 	HttpRequest->SetVerb("POST");
@@ -76,7 +99,7 @@ void UWorldsbaseSubsystem::InsertData(const FString& TableName, const TArray<FDa
  * @param ConditionValue Value for column that is used to identify row to be updated
  * @param DataRows An array of FDataRow structures, each containing the column name and the value to be updated for that column.
  */
-void UWorldsbaseSubsystem::UpdateData(const FString& TableName, const FString& ConditionColumn, const FString& ConditionValue, const TArray<FDataRow>& DataRows)
+void UWorldsbaseSubsystem::UpdateData(const FString &TableName, const FString &ConditionColumn, const FString &ConditionValue, const TArray<FDataRow> &DataRows)
 {
 
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = FHttpModule::Get().CreateRequest();
@@ -86,7 +109,7 @@ void UWorldsbaseSubsystem::UpdateData(const FString& TableName, const FString& C
 
 	// construct json object from data array
 	TSharedPtr<FJsonObject> DataJsonObject = MakeShareable(new FJsonObject);
-	for (const FDataRow& DataRow : DataRows)
+	for (const FDataRow &DataRow : DataRows)
 	{
 		DataJsonObject->SetStringField(DataRow.ColumnName, DataRow.Value);
 	}
@@ -102,7 +125,7 @@ void UWorldsbaseSubsystem::UpdateData(const FString& TableName, const FString& C
 	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&OutputString);
 	FJsonSerializer::Serialize(FinalJsonObject.ToSharedRef(), Writer);
 
-	FString baseUrl = "https://wgs-node-production.up.railway.app/table/updateData/";
+	FString baseUrl = "https://chain-production.up.railway.app/table/updatedata/";
 	FString ApiKey = "323f7dfb-6ba3-4ba0-99cb-c493a3a712d7";
 
 	HttpRequest->SetVerb("PUT");
@@ -123,7 +146,7 @@ void UWorldsbaseSubsystem::UpdateData(const FString& TableName, const FString& C
  * @param ConditionValue Value for column that is used to identify row to be incremented
  * @param Value Value to increment by
  */
-void UWorldsbaseSubsystem::IncrementData(const FString& TableName, const FString& IncrementColumnName, const FString& ConditionColumn, const FString& ConditionValue, const int32 Value)
+void UWorldsbaseSubsystem::IncrementData(const FString &TableName, const FString &IncrementColumnName, const FString &ConditionColumn, const FString &ConditionValue, const int32 Value)
 {
 
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = FHttpModule::Get().CreateRequest();
@@ -143,7 +166,7 @@ void UWorldsbaseSubsystem::IncrementData(const FString& TableName, const FString
 	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&OutputString);
 	FJsonSerializer::Serialize(FinalJsonObject.ToSharedRef(), Writer);
 
-	FString baseUrl = "https://wgs-node-production.up.railway.app/table/incrementData/";
+	FString baseUrl = "https://chain-production.up.railway.app/table/incrementdata/";
 	FString ApiKey = "323f7dfb-6ba3-4ba0-99cb-c493a3a712d7";
 
 	HttpRequest->SetVerb("POST");
@@ -164,7 +187,7 @@ void UWorldsbaseSubsystem::IncrementData(const FString& TableName, const FString
  * @param ConditionValue Value for column that is used to identify row to be decremented
  * @param Value Value to decrement by
  */
-void UWorldsbaseSubsystem::DecrementData(const FString& TableName, const FString& DecrementColumnName, const FString& ConditionColumn, const FString& ConditionValue, const int32 Value)
+void UWorldsbaseSubsystem::DecrementData(const FString &TableName, const FString &DecrementColumnName, const FString &ConditionColumn, const FString &ConditionValue, const int32 Value)
 {
 
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = FHttpModule::Get().CreateRequest();
@@ -184,7 +207,7 @@ void UWorldsbaseSubsystem::DecrementData(const FString& TableName, const FString
 	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&OutputString);
 	FJsonSerializer::Serialize(FinalJsonObject.ToSharedRef(), Writer);
 
-	FString baseUrl = "https://wgs-node-production.up.railway.app/table/decrementData/";
+	FString baseUrl = "https://chain-production.up.railway.app/table/decrementdata/";
 	FString ApiKey = "323f7dfb-6ba3-4ba0-99cb-c493a3a712d7";
 
 	HttpRequest->SetVerb("POST");
@@ -225,4 +248,3 @@ void UWorldsbaseSubsystem::OnProcessRequestComplete(FHttpRequestPtr Request, FHt
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Error"));
 	}
 }
-
