@@ -49,6 +49,41 @@ void UWorldsbaseSubsystem::GetValue(const FString &TableName, const FString &Col
 }
 
 /**
+ * Reads data from a specified table in Worldsbase, filtering by multiple column values.
+ *
+ * @param TableName The name of the table where the data will be read
+ * @param Filters A map of column names to their respective values for filtering
+ */
+void UWorldsbaseSubsystem::GetFilteredTableValues(const FString &TableName, const TMap<FString, FString> &Filters)
+{
+	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = FHttpModule::Get().CreateRequest();
+
+	FString baseUrl = "https://chain-production.up.railway.app/table/gettablevalues/";
+	FString filterParams = TEXT("?filters=");
+	bool isFirst = true;
+
+	for (const TPair<FString, FString> &Filter : Filters)
+	{
+		if (!isFirst)
+		{
+			filterParams += ",";
+		}
+		filterParams += FString::Printf(TEXT("%s=%s"), *Filter.Key, *Filter.Value);
+		isFirst = false;
+	}
+
+	FString fullUrl = baseUrl + TableName + filterParams;
+	FString ApiKey = "323f7dfb-6ba3-4ba0-99cb-c493a3a712d7";
+
+	HttpRequest->SetVerb("GET");
+	HttpRequest->SetHeader("Content-Type", "application/json");
+	HttpRequest->SetURL(*fullUrl);
+	HttpRequest->SetHeader("x-api-key", *ApiKey);
+	HttpRequest->OnProcessRequestComplete().BindUObject(this, &UWorldsbaseSubsystem::OnProcessRequestComplete);
+	HttpRequest->ProcessRequest();
+}
+
+/**
  * Inserts data into a specified table using Worldsbase. This function constructs
  * a JSON object from the provided data rows, and then sends a POST request
  * to a predefined URL to insert the data into the specified table.

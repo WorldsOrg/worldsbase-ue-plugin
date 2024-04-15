@@ -56,9 +56,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Worldsbase")
 	void GetValue(const FString &TableName, const FString &ColumnName, const FString &ColumnValue);
 
-	// Delegate instance for Blueprint to bind to
-	UPROPERTY(BlueprintAssignable, Category = "Worldsbase")
-	FOnHttpRequestCompleted OnHttpRequestCompleted;
+	UFUNCTION(BlueprintCallable, Category = "Worldsbase")
+	void GetFilteredTableValues(const FString &TableName, const TMap<FString, FString> &Filters)
+
+		// Delegate instance for Blueprint to bind to
+		UPROPERTY(BlueprintAssignable, Category = "Worldsbase")
+			FOnHttpRequestCompleted OnHttpRequestCompleted;
 
 private:
 	void OnProcessRequestComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
