@@ -25,7 +25,7 @@ void UWorldsbaseSubsystem::GetTable(const FString &TableName)
 }
 
 /**
- * Reads data from a specified table using Worldsbase.
+ * Reads data from a specified table using Worldsbase, filtering by a specified column.
  *
  * @param TableName The name of the table where the data will be read
  * @param ColumnName The name of the column to filter by
@@ -36,7 +36,7 @@ void UWorldsbaseSubsystem::GetValue(const FString &TableName, const FString &Col
 
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = FHttpModule::Get().CreateRequest();
 
-	FString baseUrl = "https://chain-production.up.railway.app/table/getvalue/";
+	FString baseUrl = "https://chain-production.up.railway.app/table/gettablevalue/";
 	FString fullUrl = FString::Printf(TEXT("%s%s/%s/%s"), *baseUrl, *TableName, *ColumnName, *ColumnValue);
 	FString ApiKey = "323f7dfb-6ba3-4ba0-99cb-c493a3a712d7";
 
