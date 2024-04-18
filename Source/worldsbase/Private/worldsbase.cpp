@@ -1,20 +1,58 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright 2014-2019 Vladimir Alyamkin. All Rights Reserved.
 
 #include "worldsbase.h"
 
-#define LOCTEXT_NAMESPACE "FworldsbaseModule"
+#include "WorldsbaseDefines.h"
+#include "WorldsbaseLibrary.h"
+#include "WorldsbaseSettings.h"
 
-void FworldsbaseModule::StartupModule()
+#include "Developer/Settings/Public/ISettingsModule.h"
+#include "UObject/Package.h"
+
+#define LOCTEXT_NAMESPACE "FWorldsbaseModule"
+
+void FWorldsbaseModule::StartupModule()
 {
-	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
+	ModuleSettings = NewObject<UWorldsbaseSettings>(GetTransientPackage(), "WorldsbaseSettings", RF_Standalone);
+	ModuleSettings->AddToRoot();
+
+	// Register settings
+	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
+	{
+		SettingsModule->RegisterSettings("Project", "Plugins", "Worldsbase",
+			LOCTEXT("RuntimeSettingsName", "Worldsbase"),
+			LOCTEXT("RuntimeSettingsDescription", "Configure Worldsbase plugin settings"),
+			ModuleSettings);
+	}
+
+	UE_LOG(LogWorldsbase, Log, TEXT("%s: Worldsbase (%s) module started"), *VA_FUNC_LINE, *UWorldsbaseLibrary::GetWorldsbaseVersion());
 }
 
-void FworldsbaseModule::ShutdownModule()
+void FWorldsbaseModule::ShutdownModule()
 {
-	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
-	// we call this function before unloading the module.
+	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
+	{
+		SettingsModule->UnregisterSettings("Project", "Plugins", "Worldsbase");
+	}
+
+	if (!GExitPurge)
+	{
+		ModuleSettings->RemoveFromRoot();
+	}
+	else
+	{
+		ModuleSettings = nullptr;
+	}
 }
+
+UWorldsbaseSettings* FWorldsbaseModule::GetSettings() const
+{
+	check(ModuleSettings);
+	return ModuleSettings;
+}
+
+IMPLEMENT_MODULE(FWorldsbaseModule, Worldsbase)
+
+DEFINE_LOG_CATEGORY(LogWorldsbase);
 
 #undef LOCTEXT_NAMESPACE
-	
-IMPLEMENT_MODULE(FworldsbaseModule, worldsbase)
