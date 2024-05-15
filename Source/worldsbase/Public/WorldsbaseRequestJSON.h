@@ -38,11 +38,11 @@ public:
 
 	FWorldsbaseLatentAction(FWeakObjectPtr RequestObj, T& ResultParam, const FLatentActionInfo& LatentInfo)
 		: Called(false)
-		, Request(RequestObj)
-		, ExecutionFunction(LatentInfo.ExecutionFunction)
-		, OutputLink(LatentInfo.Linkage)
-		, CallbackTarget(LatentInfo.CallbackTarget)
-		, Result(ResultParam)
+		  , Request(RequestObj)
+		  , ExecutionFunction(LatentInfo.ExecutionFunction)
+		  , OutputLink(LatentInfo.Linkage)
+		  , CallbackTarget(LatentInfo.CallbackTarget)
+		  , Result(ResultParam)
 	{
 	}
 
@@ -51,12 +51,12 @@ public:
 		Response.FinishAndTriggerIf(Called, ExecutionFunction, OutputLink, CallbackTarget);
 	}
 
-	virtual void NotifyObjectDestroyed()
+	virtual void NotifyObjectDestroyed() override
 	{
 		Cancel();
 	}
 
-	virtual void NotifyActionAborted()
+	virtual void NotifyActionAborted() override
 	{
 		Cancel();
 	}
@@ -74,6 +74,7 @@ public:
 
 /** Generate a delegates for callback events */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRequestComplete, class UWorldsbaseRequestJSON*, Request);
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRequestFail, class UWorldsbaseRequestJSON*, Request);
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnStaticRequestComplete, class UWorldsbaseRequestJSON*);
@@ -86,8 +87,6 @@ UCLASS(BlueprintType, Blueprintable)
 class WORLDSBASE_API UWorldsbaseRequestJSON : public UObject
 {
 	GENERATED_UCLASS_BODY()
-
-public:
 	//////////////////////////////////////////////////////////////////////////
 	// Construction
 
@@ -119,6 +118,18 @@ public:
 	/** Sets optional header info */
 	UFUNCTION(BlueprintCallable, Category = "Worldsbase|Request")
 	void SetHeader(const FString& HeaderName, const FString& HeaderValue);
+
+	/** Sets API Key header info */
+	UFUNCTION(BlueprintCallable, Category = "Worldsbase|Request")
+	void SetApiKey(const FString& ApiKey);
+
+	/** Sets authorization header info */
+	UFUNCTION(BlueprintCallable, Category = "Worldsbase|Request")
+	void SetAuthorizationToken(const FString& AuthToken);
+
+	/** Sets basic authorization header info */
+	UFUNCTION(BlueprintCallable, Category = "Worldsbase|Request")
+	void SetBasicAuthorization(const FString& Username, const FString& Password);
 
 	//////////////////////////////////////////////////////////////////////////
 	// Destruction and reset
@@ -209,7 +220,6 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 	// URL processing
 
-public:
 	/** Setting request URL */
 	UFUNCTION(BlueprintCallable, Category = "Worldsbase|Request")
 	void SetURL(const FString& Url = TEXT("http://alyamkin.com"));
@@ -255,7 +265,6 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 	// Tags
 
-public:
 	/** Add tag to this request */
 	UFUNCTION(BlueprintCallable, Category = "Worldsbase|Utility")
 	void AddTag(FName Tag);
@@ -287,7 +296,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Worldsbase|Response")
 	FString GetResponseContentAsString(bool bCacheResponseContent = true);
 
-public:
 	/** Response size */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Worldsbase|Response")
 	int32 ResponseSize;
@@ -304,7 +312,6 @@ protected:
 	/** Default value for deprecated ResponseContent variable */
 	static FString DeprecatedResponseString;
 
-protected:
 	/** Latent action helper */
 	FWorldsbaseLatentAction<UWorldsbaseJsonObject*>* ContinueAction;
 
