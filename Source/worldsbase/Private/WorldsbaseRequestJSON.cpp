@@ -23,13 +23,13 @@ void FWorldsbaseLatentAction<T>::Cancel()
 	UObject* Obj = Request.Get();
 	if (Obj != nullptr)
 	{
-		((UWorldsbaseRequestJSON*)Obj)->Cancel();
+		static_cast<UWorldsbaseRequestJSON*>(Obj)->Cancel();
 	}
 }
 
 UWorldsbaseRequestJSON::UWorldsbaseRequestJSON(const class FObjectInitializer& PCIP)
 	: Super(PCIP)
-	, BinaryContentType(TEXT("application/octet-stream"))
+	  , BinaryContentType(TEXT("application/octet-stream"))
 {
 	ContinueAction = nullptr;
 
@@ -72,6 +72,21 @@ void UWorldsbaseRequestJSON::SetStringRequestContent(const FString& Content)
 void UWorldsbaseRequestJSON::SetHeader(const FString& HeaderName, const FString& HeaderValue)
 {
 	RequestHeaders.Add(HeaderName, HeaderValue);
+}
+
+void UWorldsbaseRequestJSON::SetApiKey(const FString& ApiKey)
+{
+	RequestHeaders.Add("x-api-key", ApiKey);
+}
+
+void UWorldsbaseRequestJSON::SetAuthorizationToken(const FString& AuthToken)
+{
+	RequestHeaders.Add("Authorization", "Bearer " + AuthToken);
+}
+
+void UWorldsbaseRequestJSON::SetBasicAuthorization(const FString& Username, const FString& Password)
+{
+	RequestHeaders.Add("Authorization", "Basic " + UWorldsbaseLibrary::Base64Encode(Username + ":" + Password));
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -199,7 +214,7 @@ EWorldsbaseRequestVerb UWorldsbaseRequestJSON::GetVerb() const
 
 EWorldsbaseRequestStatus UWorldsbaseRequestJSON::GetStatus() const
 {
-	return EWorldsbaseRequestStatus((uint8)HttpRequest->GetStatus());
+	return static_cast<EWorldsbaseRequestStatus>(static_cast<uint8>(HttpRequest->GetStatus()));
 }
 
 int32 UWorldsbaseRequestJSON::GetResponseCode() const
@@ -304,28 +319,22 @@ void UWorldsbaseRequestJSON::ProcessRequest()
 	// Set verb
 	switch (RequestVerb)
 	{
-	case EWorldsbaseRequestVerb::GET:
-		HttpRequest->SetVerb(TEXT("GET"));
+	case EWorldsbaseRequestVerb::GET: HttpRequest->SetVerb(TEXT("GET"));
 		break;
 
-	case EWorldsbaseRequestVerb::POST:
-		HttpRequest->SetVerb(TEXT("POST"));
+	case EWorldsbaseRequestVerb::POST: HttpRequest->SetVerb(TEXT("POST"));
 		break;
 
-	case EWorldsbaseRequestVerb::PUT:
-		HttpRequest->SetVerb(TEXT("PUT"));
+	case EWorldsbaseRequestVerb::PUT: HttpRequest->SetVerb(TEXT("PUT"));
 		break;
 
-	case EWorldsbaseRequestVerb::DEL:
-		HttpRequest->SetVerb(TEXT("DELETE"));
+	case EWorldsbaseRequestVerb::DEL: HttpRequest->SetVerb(TEXT("DELETE"));
 		break;
 
-	case EWorldsbaseRequestVerb::CUSTOM:
-		HttpRequest->SetVerb(CustomVerb);
+	case EWorldsbaseRequestVerb::CUSTOM: HttpRequest->SetVerb(CustomVerb);
 		break;
 
-	default:
-		break;
+	default: break;
 	}
 
 	// Set content-type
@@ -458,8 +467,7 @@ void UWorldsbaseRequestJSON::ProcessRequest()
 		break;
 	}
 
-	default:
-		break;
+	default: break;
 	}
 
 	// Apply additional headers
@@ -545,7 +553,7 @@ void UWorldsbaseRequestJSON::OnProcessRequestComplete(FHttpRequestPtr Request, F
 				ResultString += Char;
 			}
 		}
-		
+
 		// Use default unreal one
 		const TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResultString);
 		TSharedPtr<FJsonValue> OutJsonValue;
